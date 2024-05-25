@@ -212,28 +212,28 @@ class OpenSCADObject:
         if self.name in non_rendered_classes:
             pass
         else:
-            s = self._render_str_no_children() + "{" + indent(s) + "\n}"
+            # Holes exist in the compiled tree in two pieces:
+            # The shapes of the holes themselves, (an object for which
+            # obj.is_hole is True, and all its children) and the
+            # transforms necessary to put that hole in place, which
+            # are inherited from non-hole geometry.
 
-        # Holes exist in the compiled tree in two pieces:
-        # The shapes of the holes themselves, (an object for which
-        # obj.is_hole is True, and all its children) and the
-        # transforms necessary to put that hole in place, which
-        # are inherited from non-hole geometry.
-
-        # Non-hole Intersections & differences can change (shrink)
-        # the size of holes, and that shouldn't happen: an
-        # intersection/difference with an empty space should be the
-        # entirety of the empty space.
-        #  In fact, the intersection of two empty spaces should be
-        # everything contained in both of them:  their union.
-        # So... replace all super-hole intersection/diff transforms
-        # with union in the hole segment of the compiled tree.
-        # And if you figure out a better way to explain this,
-        # please, please do... because I think this works, but I
-        # also think my rationale is shaky and imprecise. 
-        # -ETJ 19 Feb 2013
-        s = s.replace("intersection", "union")
-        s = s.replace("difference", "union")
+            # Non-hole Intersections & differences can change (shrink)
+            # the size of holes, and that shouldn't happen: an
+            # intersection/difference with an empty space should be the
+            # entirety of the empty space.
+            #  In fact, the intersection of two empty spaces should be
+            # everything contained in both of them:  their union.
+            # So... replace all super-hole intersection/diff transforms
+            # with union in the hole segment of the compiled tree.
+            # And if you figure out a better way to explain this,
+            # please, please do... because I think this works, but I
+            # also think my rationale is shaky and imprecise. 
+            # -ETJ 19 Feb 2013
+            s = (self._render_str_no_children()
+                  .replace("intersection", "union")
+                  .replace("difference", "union") + 
+                  "{" + indent(s) + "\n}")
 
         return s
 
